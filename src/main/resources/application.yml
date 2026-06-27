@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Use 'validate' since we managed scripts using Supabase dashboard directly
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres?user=postgres.eevrumqeozsfntiithko
+    username: postgres.eevrumqeozsfntiithko
+    password: Admin@27**##
+    driver-class-name: org.postgresql.Driver
