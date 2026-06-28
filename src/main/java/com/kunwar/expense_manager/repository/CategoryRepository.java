@@ -12,4 +12,6 @@ import java.util.List;
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Query("Select c from Category c where c.userId IS NULL OR c.userId = :userId")
     List<Category> findAllByGlobalOrUserId(@Param("userId") String userId);
+    @Query("Select c from Category c where c.userId IS NULL")
+    List<Category> findAllDefault();
 }

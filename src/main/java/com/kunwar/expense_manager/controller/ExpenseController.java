@@ -18,12 +18,16 @@ public class ExpenseController {
     @Autowired
     private RecurringExpenseRepository expenseRepository;
 
-    @Autowired
-    private ExpenseService expenseService;
+
+    private final ExpenseService expenseService;
+
+    public ExpenseController(ExpenseService service){
+        this.expenseService = service;
+    }
 
     @GetMapping
     public List<Expenses> getAllExpenses(@RequestHeader("X-User-Id") String userId) {
-        return expenseRepository.findByUserId(userId);
+        return expenseService.getAllExpenses(userId);
     }
 
     @PostMapping
@@ -39,52 +43,58 @@ public class ExpenseController {
         Category category = new Category();
         category.setId(expenseRequest.getCategoryId());
         expense.setCategory(category);
-        return expenseRepository.save(expense);
+        return expenseService.createExpense(expense);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Expenses> updateExpense(
             @PathVariable String id,
             @RequestHeader("X-User-Id") String userId,
-            @RequestBody ExpenseRequest updatedDetails) {
-        UUID uuid;
+            @RequestBody ExpenseRequest expenseRequest) {
 
+        UUID uuid;
         try {
             uuid = UUID.fromString(id);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        Category category = new Category();
-                category.setId(updatedDetails.getCategoryId());
 
-        return expenseRepository.findById(uuid)
-                .filter(exp -> exp.getUserId().equals(userId))
-                .map(exp -> {
-                    exp.setTitle(updatedDetails.getTitle());
-                    exp.setAmount(updatedDetails.getAmount());
-                    exp.setBillingCycle(updatedDetails.getBillingCycle());
-                    exp.setStatus(updatedDetails.getStatus());
-                    exp.setCategory(category);
-                    return ResponseEntity.ok(expenseRepository.save(exp));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Expenses expense = new Expenses();
+        expense.setUserId(userId);
+        expense.setAmount(expenseRequest.getAmount());
+        expense.setTitle(expenseRequest.getTitle());
+        expense.setBillingCycle(expenseRequest.getBillingCycle());
+        expense.setStartDate(expenseRequest.getStartDate());
+        expense.setNextBillingDate(expenseRequest.getStartDate());
+
+        Category category = new Category();
+        category.setId(expenseRequest.getCategoryId());
+        expense.setCategory(category);
+
+        expense  = expenseService.updateExpense(uuid, userId, expense);
+        if(expense!=null){
+            return ResponseEntity.ok(expense);
+        }else {
+            return ResponseEntity.notFound().build();
+        }
+
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable String id, @RequestHeader("X-User-Id") String userId) {
+//String to UUID
         UUID uuid;
-
         try {
             uuid = UUID.fromString(id);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
 
-        return expenseRepository.findById(uuid)
-                .filter(exp -> exp.getUserId().equals(userId))
-                .map(exp -> {
-                    expenseRepository.delete(exp);
-                    return ResponseEntity.ok().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Boolean b = expenseService.delete(uuid, userId);
+        if(b){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+
     }
 }
