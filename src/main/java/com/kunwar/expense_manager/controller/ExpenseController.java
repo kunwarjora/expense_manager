@@ -1,12 +1,14 @@
 package com.kunwar.expense_manager.controller;
 
-import com.kunwar.expense_manager.dta.ExpenseRequest;
+import com.kunwar.expense_manager.dto.ExpenseRequest;
 import com.kunwar.expense_manager.entity.Category;
 import com.kunwar.expense_manager.entity.Expenses;
 import com.kunwar.expense_manager.repository.RecurringExpenseRepository;
 import com.kunwar.expense_manager.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,12 +28,14 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public List<Expenses> getAllExpenses(@RequestHeader("X-User-Id") String userId) {
+    public List<Expenses> getAllExpenses(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         return expenseService.getAllExpenses(userId);
     }
 
     @PostMapping
-    public Expenses createExpense(@RequestHeader("X-User-Id") String userId, @RequestBody ExpenseRequest expenseRequest) {
+    public Expenses createExpense(@AuthenticationPrincipal Jwt jwt ,@RequestBody ExpenseRequest expenseRequest) {
+        String userId = jwt.getSubject();
         Expenses expense = new Expenses();
         expense.setUserId(userId);
         expense.setAmount(expenseRequest.getAmount());
@@ -49,8 +53,9 @@ public class ExpenseController {
     @PutMapping("/{id}")
     public ResponseEntity<Expenses> updateExpense(
             @PathVariable String id,
-            @RequestHeader("X-User-Id") String userId,
+            @AuthenticationPrincipal Jwt jwt,
             @RequestBody ExpenseRequest expenseRequest) {
+        String userId = jwt.getSubject();
 
         UUID uuid;
         try {
@@ -81,7 +86,8 @@ public class ExpenseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteExpense(@PathVariable String id, @RequestHeader("X-User-Id") String userId) {
+    public ResponseEntity<Void> deleteExpense(@PathVariable String id, @AuthenticationPrincipal Jwt jwt ) {
+        String userId = jwt.getSubject();
 //String to UUID
         UUID uuid;
         try {

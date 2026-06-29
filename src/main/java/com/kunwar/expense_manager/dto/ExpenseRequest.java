@@ -1,4 +1,4 @@
-package com.kunwar.expense_manager.dta;
+package com.kunwar.expense_manager.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

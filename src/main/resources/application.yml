@@ -10,3 +10,16 @@ spring:
     username: postgres.eevrumqeozsfntiithko
     password: Admin@27**##
     driver-class-name: org.postgresql.Driver
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Replace <your_domain> with your actual Kinde subdomain
+          issuer-uri: https://kunwarjora.kinde.com
+          # This tells Spring what "Audience" to look for in the token to prevent the 403 error!
+          audiences: subscription-api
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: TRACE

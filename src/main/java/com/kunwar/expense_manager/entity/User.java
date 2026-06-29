@@ -1,13 +1,9 @@
 package com.kunwar.expense_manager.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.antlr.v4.runtime.misc.NotNull;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -16,6 +12,11 @@ public class User {
     @Id
     private String id;
     private String email;
-    @Column(name = "created_at")
-    private Date createdAt;
+    @Column(name = "created_at",updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
