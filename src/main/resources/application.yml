@@ -6,19 +6,17 @@ spring:
     show-sql: true
 
   datasource:
-    url: jdbc:postgresql://aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres?user=postgres.eevrumqeozsfntiithko
-    username: postgres.eevrumqeozsfntiithko
-    password: Admin@27**##
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          # Replace <your_domain> with your actual Kinde subdomain
-          issuer-uri: https://kunwarjora.kinde.com
-          # This tells Spring what "Audience" to look for in the token to prevent the 403 error!
-          audiences: subscription-api
+          issuer-uri: ${KINDE-ISSUER-URL}
+          audiences: ${KINDE-AUDIENCE}
 logging:
   level:
     org.springframework.security: DEBUG
