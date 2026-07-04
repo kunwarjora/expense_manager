@@ -3,9 +3,11 @@ package com.kunwar.expense_manager.controller;
 import com.kunwar.expense_manager.dto.ExpenseRequest;
 import com.kunwar.expense_manager.entity.Category;
 import com.kunwar.expense_manager.entity.Expenses;
+import com.kunwar.expense_manager.entity.PaymentHistory;
 import com.kunwar.expense_manager.repository.RecurringExpenseRepository;
 import com.kunwar.expense_manager.service.CategoryService;
 import com.kunwar.expense_manager.service.ExpenseService;
+import com.kunwar.expense_manager.service.PaymentHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +21,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/expenses")
 public class ExpenseController {
     @Autowired
-    private RecurringExpenseRepository expenseRepository;
+    private PaymentHistoryService paymentHistoryService;
     @Autowired
     private CategoryService categoryService;
 
@@ -109,10 +111,52 @@ public class ExpenseController {
 
     }
 
-    @GetMapping("current-month-total")
+    @GetMapping("/current-month-total")
     public ResponseEntity<Double> getCurrentMonthTotal(@AuthenticationPrincipal Jwt jwt){
         String userId = jwt.getSubject();
         Double total = expenseService.getCurrentMonthTotal(userId);
         return ResponseEntity.ok(total);
+    }
+
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<?> markAsPaid(@PathVariable String id, @AuthenticationPrincipal Jwt jwt){
+        String userId = jwt.getSubject();
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(id);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        Expenses expenses = expenseService.findById(uuid);
+        if( expenses==null || !expenses.getUserId().equals(userId)){
+            return ResponseEntity.status(403).body("Expense Not found");
+
+
+        }else {
+            PaymentHistory history = new PaymentHistory();
+            history.setExpenseId(expenses.getId().toString());
+            history.setUserId(expenses.getUserId());
+            history.setAmount(expenses.getAmount().toBigInteger().doubleValue());
+            paymentHistoryService.saveHistory(history);
+
+            if (expenses.getNextBillingDate() != null && expenses.getBillingCycle() != null) {
+                switch (expenses.getBillingCycle().toUpperCase()) {
+                    case "WEEKLY":
+                        expenses.setNextBillingDate(expenses.getNextBillingDate().plusWeeks(1));
+                        break;
+                    case "MONTHLY":
+                        expenses.setNextBillingDate(expenses.getNextBillingDate().plusMonths(1));
+                        break;
+                    case "YEARLY":
+                        expenses.setNextBillingDate(expenses.getNextBillingDate().plusYears(1));
+                        break;
+                    default:
+                        expenses.setNextBillingDate(expenses.getNextBillingDate().plusMonths(1));
+                }
+                expenseService.updateExpense(expenses.getId(), userId, expenses);
+                return ResponseEntity.ok(expenses);
+            }
+        }
+        return null;
     }
 }

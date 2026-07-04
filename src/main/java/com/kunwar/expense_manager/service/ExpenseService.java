@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,6 +20,9 @@ public class ExpenseService {
 
     public List<Expenses> getAllExpenses(String userId){
         return expenseRepository.findByUserIdOrderByNextBillingDateAsc(userId);
+    }
+    public Expenses findById(UUID id){
+        return expenseRepository.findById(id).orElse(null);
     }
 
     public Expenses createExpense(Expenses expense){
