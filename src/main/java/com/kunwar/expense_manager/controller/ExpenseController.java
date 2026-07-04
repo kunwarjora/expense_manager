@@ -4,6 +4,7 @@ import com.kunwar.expense_manager.dto.ExpenseRequest;
 import com.kunwar.expense_manager.entity.Category;
 import com.kunwar.expense_manager.entity.Expenses;
 import com.kunwar.expense_manager.repository.RecurringExpenseRepository;
+import com.kunwar.expense_manager.service.CategoryService;
 import com.kunwar.expense_manager.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class ExpenseController {
     @Autowired
     private RecurringExpenseRepository expenseRepository;
+    @Autowired
+    private CategoryService categoryService;
 
 
     private final ExpenseService expenseService;
@@ -42,10 +45,11 @@ public class ExpenseController {
         expense.setTitle(expenseRequest.getTitle());
         expense.setBillingCycle(expenseRequest.getBillingCycle());
         expense.setStartDate(expenseRequest.getStartDate());
-        expense.setNextBillingDate(expenseRequest.getStartDate());
+//        expense.setNextBillingDate(expenseRequest.getStartDate());
 
-        Category category = new Category();
-        category.setId(expenseRequest.getCategoryId());
+        Category category ;
+//        category.setId(expenseRequest.getCategoryId());
+        category = categoryService.getCategory(expenseRequest.getCategoryId());
         expense.setCategory(category);
         return expenseService.createExpense(expense);
     }
@@ -72,8 +76,9 @@ public class ExpenseController {
         expense.setStartDate(expenseRequest.getStartDate());
         expense.setNextBillingDate(expenseRequest.getStartDate());
 
-        Category category = new Category();
-        category.setId(expenseRequest.getCategoryId());
+        Category category;
+//        category.setId(expenseRequest.getCategoryId());
+        category = categoryService.getCategory(expenseRequest.getCategoryId());
         expense.setCategory(category);
 
         expense  = expenseService.updateExpense(uuid, userId, expense);
@@ -102,5 +107,12 @@ public class ExpenseController {
         }
         return ResponseEntity.notFound().build();
 
+    }
+
+    @GetMapping("current-month-total")
+    public ResponseEntity<Double> getCurrentMonthTotal(@AuthenticationPrincipal Jwt jwt){
+        String userId = jwt.getSubject();
+        Double total = expenseService.getCurrentMonthTotal(userId);
+        return ResponseEntity.ok(total);
     }
 }

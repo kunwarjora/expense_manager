@@ -43,4 +43,28 @@ public class Expenses {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private ZonedDateTime createdAt;
+
+    @PrePersist
+    protected void onExpenseCreate(){
+        if(this.startDate== null){
+            this.startDate= LocalDate.now();
+        }
+        if(this.nextBillingDate==null && this.billingCycle!=null){
+            switch (this.billingCycle.toUpperCase()){
+                case "WEEKLY":
+                    this.nextBillingDate=startDate.plusWeeks(1);
+                    break;
+
+                case "MONTHLY":
+                    this.nextBillingDate= startDate.plusMonths(1);
+                    break;
+
+                case "YEARLY":
+                    this.nextBillingDate=startDate.plusYears(1);
+                    break;
+                default:
+                    this.nextBillingDate=startDate.plusMonths(1);
+            }
+        }
+    }
 }

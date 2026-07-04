@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +19,7 @@ public class ExpenseService {
     private RecurringExpenseRepository expenseRepository;
 
     public List<Expenses> getAllExpenses(String userId){
-        return expenseRepository.findByUserId(userId);
+        return expenseRepository.findByUserIdOrderByNextBillingDateAsc(userId);
     }
 
     public Expenses createExpense(Expenses expense){
@@ -43,6 +46,9 @@ public class ExpenseService {
                     return true;
                 }).orElse(false);
 
+    }
+    public Double getCurrentMonthTotal(String userId){
+        return expenseRepository.sumExpensesForCurrentMonth(userId, LocalDate.now().withDayOfMonth(1), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
     }
     private BigDecimal convertToMonthly(Expenses expense) {
         BigDecimal amount = expense.getAmount();
