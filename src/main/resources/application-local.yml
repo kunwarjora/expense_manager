@@ -1,10 +1,8 @@
 spring:
-  profiles:
-    active: local
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate # 'validate' since we managed scripts using Supabase dashboard directly
+      ddl-auto: validate #  'validate' since we managed scripts using Supabase dashboard directly
     show-sql: true
 
   datasource:
@@ -19,7 +17,18 @@ spring:
         jwt:
           issuer-uri: ${KINDE-ISSUER-URL}
           audiences: ${KINDE-AUDIENCE}
+  ai:
+    open-ai:
+      api-key: ${GROQ_API-KEY}
+      base-url: ${GROQ_URL}
+      chat:
+        options:
+          model: ${GROQ_MODEL}
+          max-tokens: 500
+
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.oauth2: TRACE
+
+
