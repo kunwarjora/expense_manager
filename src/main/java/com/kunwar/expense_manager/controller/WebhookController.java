@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.http.HttpResponse;
 import java.util.Base64;
 
 @RestController
@@ -26,7 +25,7 @@ public class WebhookController {
     private ObjectMapper objectMapper;
     @PostMapping(value = "/kinde", consumes = {"application/jwt", "application/jwt;charset=UTF-8"})
     public ResponseEntity<String> handleKindeWebhook(@RequestBody String jwtToken){
-        System.out.println("🚨 WEBHOOK RECEIVED!");
+        System.out.println("WEBHOOK RECEIVED!");
         try{
         String[] chunks = jwtToken.split("\\.");
         if(chunks.length<2){
@@ -50,7 +49,7 @@ public class WebhookController {
                 System.out.println("New user synced from Kinde: " + email);
             }
         }else{
-            System.out.println("🛑 IGNORING: Event type is not 'user.created'");
+            System.out.println("IGNORING: Event type is not 'user.created'");
         }
 
         return ResponseEntity.ok("Webhook processed");

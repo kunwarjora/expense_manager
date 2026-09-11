@@ -9,8 +9,11 @@ import java.util.List;
 
 @Service
 public class PaymentHistoryService {
-    @Autowired
-    private PaymentHistoryRepository repository;
+
+    private final PaymentHistoryRepository repository;
+    PaymentHistoryService(PaymentHistoryRepository repository){
+        this.repository = repository;
+    }
 
     public List<PaymentHistory> findByUserId(String userId){
         return repository.findByUserIdOrderByPaymentDateDesc(userId);
